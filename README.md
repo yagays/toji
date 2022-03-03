@@ -19,11 +19,13 @@ $ poetry install
 $ poetry run streamlit run tohji/app.py
 ```
 
+And access to [http://localhost:8501/](http://localhost:8501/)
+
 ### Use Web App
 
 1. Prepare the speech texts with line breaks and paste it into the text area.
-2. Press `START` button to start recording
-3. When you have finished speaking, press the `STOP` button
+2. Press `START` button to start recording.
+3. When you have finished speaking, press the `STOP` button.
 4. Press `Next` to move on to the next utterance.
 5. When all tasks are finished, click `Proceed to Download` button to download the wav files.
 

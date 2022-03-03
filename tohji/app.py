@@ -28,7 +28,7 @@ def main():
             shutil.rmtree(str(wav_dir))
         wav_dir.mkdir()
 
-    st.sidebar.title("tohji - Voice Recorder")
+    st.sidebar.title("Tohji - Voice Recorder")
     all_text = st.sidebar.text_area("input texts", "")
 
     col1, col2 = st.columns(2)
