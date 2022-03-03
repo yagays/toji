@@ -9,13 +9,13 @@ import pydub
 import streamlit as st
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
-from toji.util import Counter
+from tohji.util import Counter
 
 
 def main():
     wav_dir = Path("data/")
     record_info_path = wav_dir / "meta.json"
-    archive_filename = "toji_wav_archive.zip"
+    archive_filename = "tohji_wav_archive.zip"
 
     # initialize
     if "counter" not in st.session_state:
@@ -28,7 +28,7 @@ def main():
             shutil.rmtree(str(wav_dir))
         wav_dir.mkdir()
 
-    st.sidebar.title("Toji - Voice Recorder")
+    st.sidebar.title("tohji - Voice Recorder")
     all_text = st.sidebar.text_area("input texts", "")
 
     col1, col2 = st.columns(2)

@@ -1,5 +1,5 @@
-# Toji - 東寺
-Toji is standalone web application that collect a lot of speech audio efficiently.
+# tohji - 東寺
+tohji is standalone web application that collect a lot of speech audio efficiently.
 
 ![](docs/animation.gif)
 
@@ -8,15 +8,15 @@ Toji is standalone web application that collect a lot of speech audio efficientl
 You can use docker,
 
 ```shell
-$ docker build -t toji .
-$ docker run -p 8501:8501 --rm -t -i toji
+$ docker build -t tohji .
+$ docker run -p 8501:8501 --rm -t -i tohji
 ```
 
 or start locally.
 
 ```shell
 $ poetry install
-$ poetry run streamlit run toji/app.py
+$ poetry run streamlit run tohji/app.py
 ```
 
 ### Use Web App
