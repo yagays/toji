@@ -114,7 +114,7 @@ def main():
 
     if st.session_state["counter"].total:
         # progress bar
-        st.sidebar.subheader("Stats")
+        st.sidebar.subheader("Progress")
         progress_percent = st.session_state["counter"].progress_percent if st.session_state["counter"].total else 0.0
         st.sidebar.progress(progress_percent)
 
