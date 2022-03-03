@@ -24,8 +24,9 @@ def main():
         st.session_state["records"] = []
 
         # initialize wav dir
-        shutil.rmtree(str(wav_dir))
-        wav_dir.mkdir(exist_ok=True)
+        if wav_dir.exists():
+            shutil.rmtree(str(wav_dir))
+        wav_dir.mkdir()
 
     st.sidebar.title("Toji - Voice Recorder")
     all_text = st.sidebar.text_area("input texts", "")
