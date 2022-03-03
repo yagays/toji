@@ -2,6 +2,22 @@ FROM python:3.9.10-buster
 
 WORKDIR /app/
 
+RUN  apt-get update \
+    && apt-get install -y \
+    ffmpeg \
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavfilter-dev \
+    libavutil-dev \
+    libswresample-dev \
+    libswscale-dev \
+    libopus-dev \
+    libvpx-dev \
+    pkg-config \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install Poetry
 RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
     cd /usr/local/bin && \
