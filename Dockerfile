@@ -11,7 +11,7 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python
 COPY . .
 
 # Allow installing dev dependencies to run tests
-ARG INSTALL_DEV=true
+ARG INSTALL_DEV=false
 RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install ; else poetry install --no-dev ; fi"
 
 CMD ["sh", "./run.sh"]
