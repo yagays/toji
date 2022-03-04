@@ -3,4 +3,5 @@ __pycache__/
 .mypy_cache/
 .tox/
 data/
+docs/
 toji_wav_archive.zip
