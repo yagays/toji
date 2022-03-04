@@ -52,7 +52,7 @@ def main():
         output_file_path = wav_dir / output_file_name
         record_info = {"text": target_text, "file_name": output_file_name}
 
-        st.title(f"{target_text}")
+        st.markdown(f"# {target_text}", unsafe_allow_html=True)
         webrtc_ctx = webrtc_streamer(
             key="sendonly-audio",
             mode=WebRtcMode.SENDONLY,
