@@ -5,6 +5,8 @@ Collect voice readings easily! All you need is the manuscripts to read out. The 
 
 ![](docs/animation.gif)
 
+Toji (東寺) is the name of Japanese temple. The name of this repository is derived from a phrase that appears in the lead of the first sentence of [Voice Actress Corpus](http://voice-statistics.github.io/).
+
 ## Usage
 ### Start-up
 You can use docker,
