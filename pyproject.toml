@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tohji"
+name = "toji"
 version = "0.1.0"
 description = ""
 authors = ["Yuki Okuda <y.okuda@dr-ubie.com>"]
@@ -43,7 +43,7 @@ exclude = '''
 [tool.isort]
 profile = "hug"
 line_length = 120
-src_paths = ["tohji", "tests"]
+src_paths = ["toji", "tests"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"

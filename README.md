@@ -1,5 +1,5 @@
-# Tohji - 東寺
-Tohji is standalone web application for collecting a large amount of voices read aloud from the manuscript efficiently.
+# Toji - 東寺
+Toji is standalone web application for collecting a large amount of voices read aloud from the manuscript efficiently.
 
 Collect voice readings easily! All you need is the manuscripts to read out. The manuscript will appear on the screen, and then press the Record button to record the voice corresponding to the manuscript. Finally, you can download the recorded voices as a zip file.
 
@@ -10,15 +10,15 @@ Collect voice readings easily! All you need is the manuscripts to read out. The 
 You can use docker,
 
 ```shell
-$ docker build -t tohji .
-$ docker run -p 8501:8501 --rm -t -i tohji
+$ docker build -t toji .
+$ docker run -p 8501:8501 --rm -t -i toji
 ```
 
 or start locally.
 
 ```shell
 $ poetry install
-$ poetry run streamlit run tohji/app.py
+$ poetry run streamlit run toji/app.py
 ```
 
 And access to [http://localhost:8501/](http://localhost:8501/)

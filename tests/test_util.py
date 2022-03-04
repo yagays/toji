@@ -1,6 +1,6 @@
 import pytest
 
-from tohji.util import Counter
+from toji.util import Counter
 
 
 @pytest.fixture()

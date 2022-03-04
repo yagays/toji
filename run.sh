@@ -1,1 +1,1 @@
-poetry run streamlit run tohji/app.py
+poetry run streamlit run toji/app.py
