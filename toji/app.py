@@ -21,7 +21,7 @@ def main():
     if "counter" not in st.session_state:
         st.session_state["counter"] = Counter()
     if "records" not in st.session_state:
-        st.session_state["records"] = []
+        st.session_state["records"] = {}
 
         # initialize wav dir
         if wav_dir.exists():
@@ -98,7 +98,7 @@ def main():
         if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
             status_indicator.success("Finish Recording")
             try:
-                st.session_state["records"].append(record_info)
+                st.session_state["records"][output_file_name] = record_info
                 audio_buffer.export(str(output_file_path), format="wav")
             except BaseException:
                 st.error("Error while Writing wav to disk")
@@ -127,7 +127,12 @@ def main():
         if st.sidebar.button("Proceed to download"):
             n_files = 0
             with record_info_path.open("w") as f:
-                json.dump(st.session_state["records"], f, ensure_ascii=False, indent=4)
+                json.dump(
+                    [record_info for _, record_info in st.session_state["records"].items()],
+                    f,
+                    ensure_ascii=False,
+                    indent=4,
+                )
             with zipfile.ZipFile(archive_filename, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
                 for file_path in wav_dir.rglob("*"):
                     archive.write(file_path, arcname=file_path.relative_to(wav_dir))
