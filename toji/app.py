@@ -1,14 +1,14 @@
 import hashlib
-import json
 import queue
 import shutil
-import zipfile
 from pathlib import Path
 
 import pydub
 import streamlit as st
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
+import toji.ui.main as ui_main
+import toji.ui.sidebar as ui_sidebar
 from toji.util import Counter
 
 
@@ -28,19 +28,12 @@ def main():
             shutil.rmtree(str(wav_dir))
         wav_dir.mkdir()
 
-    st.sidebar.title("toji - Voice Recorder")
-    all_text = st.sidebar.text_area("input texts", "")
+    ui_sidebar.title()
+    ui_sidebar.manuscripts_text_area()
+    ui_main.previous_next_button()
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("< Previous"):
-            st.session_state["counter"].previous()
-    with col2:
-        if st.button("Next >"):
-            st.session_state["counter"].next()
-
-    if all_text:
-        texts = [t for t in all_text.split("\n") if t]
+    if st.session_state["manuscripts"]:
+        texts = [t for t in st.session_state["manuscripts"].split("\n") if t]
 
         if st.session_state["counter"].total is None:
             st.session_state["counter"].set_total(len(texts))
@@ -52,7 +45,7 @@ def main():
         output_file_path = wav_dir / output_file_name
         record_info = {"text": target_text, "file_name": output_file_name}
 
-        st.markdown(f"# {target_text}", unsafe_allow_html=True)
+        ui_main.manuscript_view(target_text)
         webrtc_ctx = webrtc_streamer(
             key="sendonly-audio",
             mode=WebRtcMode.SENDONLY,
@@ -66,17 +59,17 @@ def main():
         if "audio_buffer" not in st.session_state:
             st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-        status_indicator = st.empty()
+        status_indicator = ui_main.StatusIndicator()
 
         while True:
             if webrtc_ctx.audio_receiver:
                 try:
                     audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
                 except queue.Empty:
-                    status_indicator.warning("No frame arrived.")
+                    status_indicator.no_frame_arrived()
                     continue
 
-                status_indicator.info("Now Recording...")
+                status_indicator.now_recording()
 
                 sound_chunk = pydub.AudioSegment.empty()
                 for audio_frame in audio_frames:
@@ -96,7 +89,7 @@ def main():
         audio_buffer = st.session_state["audio_buffer"]
 
         if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-            status_indicator.success("Finish Recording")
+            status_indicator.finish_recording()
             try:
                 st.session_state["records"][output_file_name] = record_info
                 audio_buffer.export(str(output_file_path), format="wav")
@@ -106,43 +99,11 @@ def main():
             # Reset
             st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-        if output_file_path.exists():
-            with output_file_path.open("rb") as f:
-                audio_bytes = f.read()
+        ui_main.audio_player_if_exists(output_file_path)
 
-            st.audio(audio_bytes)
-
-    if st.session_state["counter"].total:
-        # progress bar
-        st.sidebar.subheader("Progress")
-        progress_percent = st.session_state["counter"].progress_percent if st.session_state["counter"].total else 0.0
-        st.sidebar.progress(progress_percent)
-
-        # stats
-        current_num = st.session_state["counter"].index + 1
-        total_num = st.session_state["counter"].total if st.session_state["counter"].total else 0
-        st.sidebar.write(f"{current_num} / {total_num}")
-
-        # download
-        if st.sidebar.button("Proceed to download"):
-            n_files = 0
-            with record_info_path.open("w") as f:
-                json.dump(
-                    [record_info for _, record_info in st.session_state["records"].items()],
-                    f,
-                    ensure_ascii=False,
-                    indent=4,
-                )
-            with zipfile.ZipFile(archive_filename, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-                for file_path in wav_dir.rglob("*"):
-                    archive.write(file_path, arcname=file_path.relative_to(wav_dir))
-                    n_files += 1
-            st.sidebar.write("Archive Stats:")
-            st.sidebar.write(f"- Num. of wav files {n_files -1 }")  # -1 for meta.json
-            with open(archive_filename, "rb") as fp:
-                st.sidebar.download_button(
-                    label="Download", data=fp, file_name=archive_filename, mime="application/zip"
-                )
+    if ui_sidebar.has_at_least_one_wav_file():
+        ui_sidebar.progress_bar_and_stats()
+        ui_sidebar.proceed_to_download(record_info_path, archive_filename, wav_dir)
 
 
 if __name__ == "__main__":
