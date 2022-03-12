@@ -45,7 +45,7 @@ def main():
         output_file_path = wav_dir / output_file_name
         record_info = {"text": target_text, "file_name": output_file_name}
 
-        st.markdown(f"# {target_text}", unsafe_allow_html=True)
+        ui_main.manuscript_view(target_text)
         webrtc_ctx = webrtc_streamer(
             key="sendonly-audio",
             mode=WebRtcMode.SENDONLY,
@@ -59,17 +59,17 @@ def main():
         if "audio_buffer" not in st.session_state:
             st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-        status_indicator = st.empty()
+        status_indicator = ui_main.StatusIndicator()
 
         while True:
             if webrtc_ctx.audio_receiver:
                 try:
                     audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
                 except queue.Empty:
-                    status_indicator.warning("No frame arrived.")
+                    status_indicator.no_frame_arrived()
                     continue
 
-                status_indicator.info("Now Recording...")
+                status_indicator.now_recording()
 
                 sound_chunk = pydub.AudioSegment.empty()
                 for audio_frame in audio_frames:
@@ -89,7 +89,7 @@ def main():
         audio_buffer = st.session_state["audio_buffer"]
 
         if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-            status_indicator.success("Finish Recording")
+            status_indicator.finish_recording()
             try:
                 st.session_state["records"][output_file_name] = record_info
                 audio_buffer.export(str(output_file_path), format="wav")
@@ -99,11 +99,7 @@ def main():
             # Reset
             st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-        if output_file_path.exists():
-            with output_file_path.open("rb") as f:
-                audio_bytes = f.read()
-
-            st.audio(audio_bytes)
+        ui_main.audio_player_if_exists(output_file_path)
 
     if ui_sidebar.has_at_least_one_wav_file():
         ui_sidebar.progress_bar_and_stats()
