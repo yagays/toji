@@ -1,6 +1,3 @@
-import json
-import zipfile
-
 import streamlit as st
 
 
@@ -29,20 +26,12 @@ def has_at_least_one_wav_file():
 
 def proceed_to_download(settings):
     if st.sidebar.button("Proceed to download"):
-        n_files = 0
-        with settings.record_info_path.open("w") as f:
-            json.dump(
-                [record_info for _, record_info in st.session_state["records"].items()],
-                f,
-                ensure_ascii=False,
-                indent=4,
-            )
-        with zipfile.ZipFile(settings.archive_filename, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-            for file_path in settings.wav_dir_path.rglob("*"):
-                archive.write(file_path, arcname=file_path.relative_to(settings.wav_dir_path))
-                n_files += 1
+        st.session_state["records"].export_record_info_as_json(settings.record_info_path)
+        st.session_state["records"].compress_wav_files_into_zip(settings.archive_filename, settings.wav_dir_path)
+        num_wav_files = st.session_state["records"].num_wav_files
+
         st.sidebar.write("Archive Stats:")
-        st.sidebar.write(f"- Num. of wav files {n_files -1 }")  # -1 for meta.json
+        st.sidebar.write(f"- Num. of wav files {num_wav_files}")
         with open(settings.archive_filename, "rb") as fp:
             st.sidebar.download_button(
                 label="Download", data=fp, file_name=settings.archive_filename, mime="application/zip"

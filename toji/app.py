@@ -8,7 +8,7 @@ from streamlit_webrtc import WebRtcMode, webrtc_streamer
 import toji.ui.main as ui_main
 import toji.ui.sidebar as ui_sidebar
 from toji.config import TojiSettings
-from toji.record import Record
+from toji.record import Record, RecordStrage
 from toji.util import Counter
 
 settings = TojiSettings()
@@ -19,7 +19,7 @@ def main():
     if "counter" not in st.session_state:
         st.session_state["counter"] = Counter()
     if "records" not in st.session_state:
-        st.session_state["records"] = {}
+        st.session_state["records"] = RecordStrage()
 
         # initialize wav dir
         if settings.wav_dir_path.exists():
@@ -88,7 +88,7 @@ def main():
         if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
             status_indicator.finish_recording()
             try:
-                st.session_state["records"][record.output_wav_name] = record.record_info
+                st.session_state["records"].id2record[record.output_wav_name] = record
                 audio_buffer.export(str(record.wav_file_path), format="wav")
             except BaseException:
                 st.error("Error while Writing wav to disk")
