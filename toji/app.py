@@ -1,7 +1,5 @@
-import hashlib
 import queue
 import shutil
-from pathlib import Path
 
 import pydub
 import streamlit as st
@@ -10,6 +8,7 @@ from streamlit_webrtc import WebRtcMode, webrtc_streamer
 import toji.ui.main as ui_main
 import toji.ui.sidebar as ui_sidebar
 from toji.config import TojiSettings
+from toji.record import Record
 from toji.util import Counter
 
 settings = TojiSettings()
@@ -37,14 +36,13 @@ def main():
         if st.session_state["counter"].total is None:
             st.session_state["counter"].set_total(len(texts))
 
-        target_index = st.session_state["counter"].index
-        target_text = texts[target_index]
-        file_id = hashlib.md5((target_text + str(target_index)).encode()).hexdigest()
-        output_file_name = f"{file_id}.wav"
-        output_file_path = settings.wav_dir_path / output_file_name
-        record_info = {"text": target_text, "file_name": output_file_name}
+        record = Record(
+            manuscript_index=st.session_state["counter"].index,
+            text=texts[st.session_state["counter"].index],
+            wav_dir_path=settings.wav_dir_path,
+        )
 
-        ui_main.manuscript_view(target_text)
+        ui_main.manuscript_view(record.text)
         webrtc_ctx = webrtc_streamer(
             key="sendonly-audio",
             mode=WebRtcMode.SENDONLY,
@@ -90,15 +88,15 @@ def main():
         if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
             status_indicator.finish_recording()
             try:
-                st.session_state["records"][output_file_name] = record_info
-                audio_buffer.export(str(output_file_path), format="wav")
+                st.session_state["records"][record.output_wav_name] = record.record_info
+                audio_buffer.export(str(record.wav_file_path), format="wav")
             except BaseException:
                 st.error("Error while Writing wav to disk")
 
             # Reset
             st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
 
-        ui_main.audio_player_if_exists(output_file_path)
+        ui_main.audio_player_if_exists(record.wav_file_path)
 
     if ui_sidebar.has_at_least_one_wav_file():
         ui_sidebar.progress_bar_and_stats()
