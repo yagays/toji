@@ -9,6 +9,7 @@ python = "^3.9"
 streamlit = "^1.7.0"
 streamlit-webrtc = "^0.35.2"
 pydub = "^0.25.1"
+pydantic = "^1.9.0"
 
 [tool.poetry.dev-dependencies]
 ipython = "^8.1.0"

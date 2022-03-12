@@ -9,14 +9,13 @@ from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 import toji.ui.main as ui_main
 import toji.ui.sidebar as ui_sidebar
+from toji.config import TojiSettings
 from toji.util import Counter
+
+settings = TojiSettings()
 
 
 def main():
-    wav_dir = Path("data/")
-    record_info_path = wav_dir / "meta.json"
-    archive_filename = "toji_wav_archive.zip"
-
     # initialize
     if "counter" not in st.session_state:
         st.session_state["counter"] = Counter()
@@ -24,9 +23,9 @@ def main():
         st.session_state["records"] = {}
 
         # initialize wav dir
-        if wav_dir.exists():
-            shutil.rmtree(str(wav_dir))
-        wav_dir.mkdir()
+        if settings.wav_dir_path.exists():
+            shutil.rmtree(str(settings.wav_dir_path))
+        settings.wav_dir_path.mkdir()
 
     ui_sidebar.title()
     ui_sidebar.manuscripts_text_area()
@@ -42,7 +41,7 @@ def main():
         target_text = texts[target_index]
         file_id = hashlib.md5((target_text + str(target_index)).encode()).hexdigest()
         output_file_name = f"{file_id}.wav"
-        output_file_path = wav_dir / output_file_name
+        output_file_path = settings.wav_dir_path / output_file_name
         record_info = {"text": target_text, "file_name": output_file_name}
 
         ui_main.manuscript_view(target_text)
@@ -103,7 +102,7 @@ def main():
 
     if ui_sidebar.has_at_least_one_wav_file():
         ui_sidebar.progress_bar_and_stats()
-        ui_sidebar.proceed_to_download(record_info_path, archive_filename, wav_dir)
+        ui_sidebar.proceed_to_download(settings)
 
 
 if __name__ == "__main__":
