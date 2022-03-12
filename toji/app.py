@@ -1,21 +1,19 @@
-import queue
 import shutil
 
-import pydub
 import streamlit as st
-from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 import toji.ui.main as ui_main
 import toji.ui.sidebar as ui_sidebar
 from toji.config import TojiSettings
 from toji.record import Record, RecordStrage
 from toji.util import Counter
+from toji.webrtc import WebRTCRecord
 
 settings = TojiSettings()
 
 
-def main():
-    # initialize
+def initialize_startup():
+    # Initialize
     if "counter" not in st.session_state:
         st.session_state["counter"] = Counter()
     if "records" not in st.session_state:
@@ -23,16 +21,26 @@ def main():
 
         # initialize wav dir
         if settings.wav_dir_path.exists():
-            shutil.rmtree(str(settings.wav_dir_path))
+            shutil.rmtree(settings.wav_dir_path)
         settings.wav_dir_path.mkdir()
 
-    ui_sidebar.title()
-    ui_sidebar.manuscripts_text_area()
+
+def main():
+    initialize_startup()
+
+    # To redraw the entire window, this should be declared first.
     ui_main.previous_next_button()
 
+    # Siebar
+    ui_sidebar.title()
+    ui_sidebar.manuscripts_text_area()
+    if ui_sidebar.has_at_least_one_wav_file():
+        ui_sidebar.progress_bar_and_stats()
+        ui_sidebar.proceed_to_download(settings)
+
+    # Main Window (only visible when manuscript is in the text area)
     if st.session_state["manuscripts"]:
         texts = [t for t in st.session_state["manuscripts"].split("\n") if t]
-
         if st.session_state["counter"].total is None:
             st.session_state["counter"].set_total(len(texts))
 
@@ -43,64 +51,11 @@ def main():
         )
 
         ui_main.manuscript_view(record.text)
-        webrtc_ctx = webrtc_streamer(
-            key="sendonly-audio",
-            mode=WebRtcMode.SENDONLY,
-            audio_receiver_size=256,
-            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
-            media_stream_constraints={
-                "audio": True,
-            },
-        )
 
-        if "audio_buffer" not in st.session_state:
-            st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
-
-        status_indicator = ui_main.StatusIndicator()
-
-        while True:
-            if webrtc_ctx.audio_receiver:
-                try:
-                    audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
-                except queue.Empty:
-                    status_indicator.no_frame_arrived()
-                    continue
-
-                status_indicator.now_recording()
-
-                sound_chunk = pydub.AudioSegment.empty()
-                for audio_frame in audio_frames:
-                    sound = pydub.AudioSegment(
-                        data=audio_frame.to_ndarray().tobytes(),
-                        sample_width=audio_frame.format.bytes,
-                        frame_rate=audio_frame.sample_rate,
-                        channels=len(audio_frame.layout.channels),
-                    )
-                    sound_chunk += sound
-
-                if len(sound_chunk) > 0:
-                    st.session_state["audio_buffer"] += sound_chunk
-            else:
-                break
-
-        audio_buffer = st.session_state["audio_buffer"]
-
-        if not webrtc_ctx.state.playing and len(audio_buffer) > 0:
-            status_indicator.finish_recording()
-            try:
-                st.session_state["records"].id2record[record.output_wav_name] = record
-                audio_buffer.export(str(record.wav_file_path), format="wav")
-            except BaseException:
-                st.error("Error while Writing wav to disk")
-
-            # Reset
-            st.session_state["audio_buffer"] = pydub.AudioSegment.empty()
+        webrtc_record = WebRTCRecord()
+        webrtc_record.recording(record)
 
         ui_main.audio_player_if_exists(record.wav_file_path)
-
-    if ui_sidebar.has_at_least_one_wav_file():
-        ui_sidebar.progress_bar_and_stats()
-        ui_sidebar.proceed_to_download(settings)
 
 
 if __name__ == "__main__":

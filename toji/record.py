@@ -3,7 +3,7 @@ import json
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 
 @dataclass
@@ -31,7 +31,6 @@ class Record:
 
 @dataclass
 class RecordStrage:
-    all_manuscripts: List[str] = field(default_factory=list)
     id2record: Dict[int, Record] = field(default_factory=dict)
 
     @property
