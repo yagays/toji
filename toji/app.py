@@ -21,7 +21,7 @@ def initialize_startup():
 
         # initialize wav dir
         if settings.wav_dir_path.exists():
-            shutil.rmtree(str(settings.wav_dir_path))
+            shutil.rmtree(settings.wav_dir_path)
         settings.wav_dir_path.mkdir()
 
 

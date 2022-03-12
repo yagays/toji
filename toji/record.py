@@ -3,7 +3,7 @@ import json
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 
 
 @dataclass
