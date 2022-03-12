@@ -31,7 +31,6 @@ class Record:
 
 @dataclass
 class RecordStrage:
-    all_manuscripts: List[str] = field(default_factory=list)
     id2record: Dict[int, Record] = field(default_factory=dict)
 
     @property

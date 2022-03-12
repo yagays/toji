@@ -21,17 +21,3 @@ def audio_player_if_exists(output_file_path):
             audio_bytes = f.read()
 
         st.audio(audio_bytes)
-
-
-class StatusIndicator:
-    def __init__(self) -> None:
-        self.box = st.empty()
-
-    def no_frame_arrived(self):
-        self.box.warning("No frame arrived.")
-
-    def now_recording(self):
-        self.box.info("Now Recording...")
-
-    def finish_recording(self):
-        self.box.success("Finish Recording")
