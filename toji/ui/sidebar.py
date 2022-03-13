@@ -27,6 +27,7 @@ def has_at_least_one_wav_file():
 def proceed_to_download(settings):
     if st.sidebar.button("Proceed to download"):
         st.session_state["records"].export_record_info_as_json(settings.record_info_path)
+        st.session_state["records"].export_unrecorded_texts_as_json(settings.unrecorded_texts_path)
         st.session_state["records"].compress_wav_files_into_zip(settings.archive_filename, settings.wav_dir_path)
         num_wav_files = st.session_state["records"].num_wav_files
 
