@@ -41,6 +41,8 @@ def main():
     # Main Window (only visible when manuscript is in the text area)
     if st.session_state["manuscripts"]:
         texts = [t for t in st.session_state["manuscripts"].split("\n") if t]
+        st.session_state["records"].all_manuscripts = texts
+
         if st.session_state["counter"].total is None:
             st.session_state["counter"].set_total(len(texts))
 
